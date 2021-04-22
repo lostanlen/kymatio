@@ -6,7 +6,21 @@ def timefrequency_scattering(
         aligned=True, max_order=2, average=True, average_fr=True,
         size_scattering=(0, 0, 0), out_type='array', pad_mode='zero'):
     """
-    Main function implementing the joint time-frequency scattering transform.
+    Main function implementing the Joint Time-Frequency Scattering transform.
+
+    Parameters
+    ----------
+    x : Tensor
+        a torch Tensor of size `(B, 1, N)` where `N` is the temporal size
+    sc_freq: scattering1d.frontend._FrequencyScatteringBase
+        Frequential scattering object, containing frequential filters and meta.
+
+    For other params, see `help(kymatio.TimeFrequencyScattering)`.
+    # TODO ^ looks good? de-duplicates
+
+    Returns
+    -------
+    # TODO precisely document return behavior
     """
     # pack for later
     B = backend

@@ -463,6 +463,48 @@ class TimeFrequencyScatteringBase():
         # TODO documentation
         cls.__doc__ = """Joint time-frequency scattering"""
 
+    # TODO
+    _doc_stuff = \
+    """
+    Parameters
+    ----------
+    J_fr : int
+        The maximum log-scale of the frequential portion of joint scattering
+        transform. That is, the maximum scale is given by :math:`2^J_fr`.
+
+    Q_fr : int
+        Number of wavelets per octave for frequential scattering.
+        # TODO make recommendations on 1 vs 2 vs etc
+
+    resample_psi_fr: bool (default True)
+        # TODO
+
+    resample_phi_fr: bool (default True)
+        # TODO
+
+    oversampling_fr: int
+        How much to oversample along frequency axis (with respect to
+        :math:`2^J_fr`): Defaults to `0`.
+
+    aligned: bool (default True)
+        If True, rows of joint slices index to same frequency for all slices.
+        E.g. `S_2[3][5]` and `S_2[4][5]` (fifth row of third and fourth joint
+        slices) correspond to same frequency.
+          - `out_type = "array"`: all slices are zero-padded to have same
+          number of rows. Earliest slices are likely to be mostly zero per
+          `psi2` convolving with minority of first-order coefficients.
+          - `out_type = "list"`: all slices are padded by minimal amount needed
+          to avert boundary effects. Number of rows will vary across slices
+          (but be same *per `psi2`*).
+
+        If False (with `out_type = "array"`), will subsample all slices to same
+        minimum controlled by `J_fr`; this breaks alignment but yields completely
+        non-redundant coeffs (True oversamples relative to False).
+
+    average_fr : bool (default True)
+        Whether to average (lowpass) along frequency axis.
+    """
+
 
 class _FrequencyScatteringBase(ScatteringBase):
     """Attribute object for TimeFrequencyScatteringBase for frequential
@@ -489,7 +531,14 @@ class _FrequencyScatteringBase(ScatteringBase):
         self.create_filters()
 
     def build(self):
-        """""" # TODO
+        """Set up padding and filters
+
+        Certain internal data, such as the amount of padding and the wavelet
+        filters to be used in the scattering transform, need to be computed
+        from the parameters given during construction. This function is called
+        automatically during object creation and no subsequent calls are
+        therefore needed.
+        """
         self.r_psi = math.sqrt(0.5)
         self.sigma0 = 0.1
         self.alpha = 5.
@@ -526,7 +575,29 @@ class _FrequencyScatteringBase(ScatteringBase):
             self.J_fr_fo = self.J_fr
 
     def compute_padding_fr(self):
-        """Long story"""  # TODO
+        """Builds padding logic of frequential scattering.
+
+        `pad_left, ind_start`: always zero since we right-pad.
+
+        `pad_right`: computed to avoid boundary effects *for each* `shape_fr`
+
+        `ind_end`: computed to undo `pad_right`
+
+        `j0s`: indexed by `n2`, is amount of *equivalent subsampling* of padding
+        relative to max padding. E.g. if max pad length is 128 and we pad
+        to 64 at `n2 = 3`, then `j0s[3] == 1`.
+
+        `ind_end_max`: maximum unpad index across all `n2` for a given subsampling
+        factor. E.g.:
+            - n2 = (0, 1, 2)
+            - J_fr = 4 --> j_fr = (0, 1, 2, 3)
+            - ind_end = [[32, 16, 8, 4],
+                         [29, 14, 7, 3],
+                         [33, 16, 8, 4]]
+            - ind_end_max = [33, 16, 8, 4]
+        Ensures same unpadded freq length for `out_type == "array"` without
+        losing information. Unused for `out_type == "list"`.
+        """
         attrs = ('J_pad', 'pad_left', 'pad_right', 'ind_start', 'ind_end', 'j0s')
         for attr in attrs:
             setattr(self, attr, [])
