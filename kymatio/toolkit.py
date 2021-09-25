@@ -118,6 +118,9 @@ def normalize(X, rscaling='l1', mean_axis=(1, 2), std_axis=(1, 2), C=None,
         standardized by the same factor - i.e. same `mean` and `std`. `rscaling`
         also accounts for rescaling due to log.
 
+    Regardless, this "channel normalization" has been used with success in
+    variuous settings; above are but points worth noting.
+
     Online computation
     ------------------
 
@@ -153,9 +156,9 @@ def normalize(X, rscaling='l1', mean_axis=(1, 2), std_axis=(1, 2), C=None,
 
     # main transform #########################################################
     if mu is None:
-        # time-sum (integral)
+        # spatial sum (integral)
         Xsum = B.sum(X, axis=-1, keepdims=True)
-        # sample-median
+        # sample median
         mu = B.median(Xsum, axis=0, keepdims=True)
     # rescale
     Xnorm = X / mu
@@ -1740,27 +1743,27 @@ def energy(x, kind='l2'):
             B.norm(x, ord=2)**2)
 
 
-def _l2(x):
+def _l2(x, axis=None):
     """`sqrt(sum(abs(x)**2))`."""
     B = ExtendedUnifiedBackend(x)
-    return B.norm(x, ord=2)
+    return B.norm(x, ord=2, axis=axis)
 
-def l2(x0, x1, adj=False):
+def l2(x0, x1, axis=None, adj=False):
     """Coeff distance measure; Eq 2.24 in
     https://www.di.ens.fr/~mallat/papiers/ScatCPAM.pdf
     """
-    ref = _l2(x0) if not adj else (_l2(x0) + _l2(x1)) / 2
-    return _l2(x1 - x0) / ref
+    ref = _l2(x0, axis) if not adj else (_l2(x0, axis) + _l2(x1, axis)) / 2
+    return _l2(x1 - x0, axis) / ref
 
 
-def _l1(x):
+def _l1(x, axis=None):
     """`sum(abs(x))`."""
     B = ExtendedUnifiedBackend(x)
     return B.norm(x, ord=1)
 
-def l1(x0, x1, adj=False):
-    ref = _l1(x0) if not adj else (_l1(x0) + _l1(x1)) / 2
-    return _l1(x1 - x0) / ref
+def l1(x0, x1, adj=False, axis=None):
+    ref = _l1(x0, axis) if not adj else (_l1(x0, axis) + _l1(x1, axis)) / 2
+    return _l1(x1 - x0, axis) / ref
 
 
 def rel_ae(x0, x1, eps=None, ref_both=True):
@@ -1792,11 +1795,15 @@ def echirp(N, fmin=1, fmax=None, tmin=0, tmax=1):
     fmax = fmax or N // 2
     t = np.linspace(tmin, tmax, N)
 
+    phi = _echirp_fn(fmin, fmax, tmin, tmax)(t)
+    return np.cos(phi)
+
+
+def _echirp_fn(fmin, fmax, tmin=0, tmax=1):
     a = (fmin**tmax / fmax**tmin) ** (1/(tmax - tmin))
     b = fmax**(1/tmax) * (1/a)**(1/tmax)
-
-    phi = 2*np.pi * (a/np.log(b)) * (b**t - b**tmin)
-    return np.cos(phi)
+    phi = lambda t: 2*np.pi * (a/np.log(b)) * (b**t - b**tmin)
+    return phi
 
 
 def fdts(N, n_partials=2, total_shift=None, f0=None, seg_len=None,
@@ -1933,7 +1940,7 @@ class ExtendedUnifiedBackend():
         # fetch from kymatio.backend if possible
         if hasattr(self.Bk, name):
             return getattr(self.Bk, name)
-        raise AttributeError(f"'{type(self.Bk).__name__}' object has no "
+        raise AttributeError(f"'{self.Bk.__name__}' object has no "
                              f"attribute '{name}'")
 
     def abs(self, x):
@@ -1957,41 +1964,43 @@ class ExtendedUnifiedBackend():
             out = self.B.reduce_sum(x, axis=axis, keepdims=keepdims)
         return out
 
-    def norm(self, x, ord=2, axis=None):
+    def norm(self, x, ord=2, axis=None, keepdims=True):
         if self.backend_name == 'numpy':
             if ord == 1:
-                out = np.sum(np.abs(x), axis=axis)
+                out = np.sum(np.abs(x), axis=axis, keepdims=keepdims)
             elif ord == 2:
-                out = np.linalg.norm(x, ord=None, axis=axis)
+                out = np.linalg.norm(x, ord=None, axis=axis, keepdims=keepdims)
             else:
-                out = np.linalg.norm(x, ord=ord, axis=axis)
+                out = np.linalg.norm(x, ord=ord, axis=axis, keepdims=keepdims)
         elif self.backend_name == 'torch':
-            out = self.B.norm(x, p=ord, dim=axis)
+            out = self.B.norm(x, p=ord, dim=axis, keepdim=keepdims)
         else:
-            out = self.B.norm(x, ord=ord, axis=axis)
+            out = self.B.norm(x, ord=ord, axis=axis, keepdims=keepdims)
         return out
 
-    def median(self, x, axis=None):
+    def median(self, x, axis=None, keepdims=None):
+        if keepdims is None and self.backend_name != 'tensorflow':
+            keepdims = True
         if self.backend_name == 'numpy':
-            out = np.median(x, axis=axis)
+            out = np.median(x, axis=axis, keepdims=keepdims)
         elif self.backend_name == 'torch':
-            out = self.B.median(x, dim=axis)
+            out = self.B.median(x, dim=axis, keepdim=keepdims)
         else:
-            if axis is not None:
-                raise ValueError("`axis` for `median` in TensorFlow backend "
-                                 "not implemented.")
+            if axis is not None or keepdims is not None:
+                raise ValueError("`axis` and `keepdims` for `median` in "
+                                 "TensorFlow backend are not implemented.")
             v = self.B.reshape(x, [-1])
             m = v.get_shape()[0]//2
             out = self.B.reduce_min(self.B.nn.top_k(v, m, sorted=False).values)
         return out
 
-    def std(self, x, axis=None):
+    def std(self, x, axis=None, keepdims=True):
         if self.backend_name == 'numpy':
-            out = np.std(x, axis=axis)
+            out = np.std(x, axis=axis, keepdims=keepdims)
         elif self.backend_name == 'torch':
-            out = self.B.std(x, dim=axis)
+            out = self.B.std(x, dim=axis, keepdim=keepdims)
         else:
-            out = self.B.math.reduce_std(x, axis=axis)
+            out = self.B.math.reduce_std(x, axis=axis, keepdims=keepdims)
         return out
 
     def numpy(self, x):
