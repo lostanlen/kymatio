@@ -921,15 +921,22 @@ def test_energy_conservation():
 
 
 def test_est_energy_conservation():
-    """Tests that `toolkit.est_energy_conservation` doesn't error."""
+    """Tests that `toolkit.est_energy_conservation` doesn't error, and that
+    values are sensible.
+    """
     N = 256
     x = np.random.randn(N)
 
     kw = dict(verbose=1, analytic=1)
     print()
-    _ = est_energy_conservation(x, jtfs=0, **kw)
+    ESr0 = est_energy_conservation(x, jtfs=0, **kw)
     print()
-    _ = est_energy_conservation(x, jtfs=1, **kw)
+    ESr1 = est_energy_conservation(x, jtfs=1, **kw)
+
+    for ESr in (ESr0, ESr1):
+        for k, v in ESr.items():
+            tol = .03  # random with torch cuda default
+            assert 0 < v < 1 + tol, (k, v)
 
 
 def test_implementation():
