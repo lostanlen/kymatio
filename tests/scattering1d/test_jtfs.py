@@ -6,9 +6,9 @@ from pathlib import Path
 from kymatio import Scattering1D, TimeFrequencyScattering1D
 from kymatio.toolkit import (drop_batch_dim_jtfs, jtfs_to_numpy, coeff_energy,
                              fdts, echirp, coeff_energy_ratios,
-                             l2, rel_ae, validate_filterbank_tm,
-                             validate_filterbank_fr, pack_coeffs_jtfs,
-                             tensor_padded)
+                             est_energy_conservation, l2, rel_ae,
+                             validate_filterbank_tm, validate_filterbank_fr,
+                             pack_coeffs_jtfs, tensor_padded)
 from kymatio.visuals import (coeff_distance_jtfs, compare_distances_jtfs,
                              energy_profile_jtfs)
 from kymatio.scattering1d.filter_bank import compute_temporal_width, gauss_1d
@@ -869,7 +869,7 @@ def test_energy_conservation():
     jtfs_a = TimeFrequencyScattering1D(**params, average=True)
     jtfs_u = TimeFrequencyScattering1D(**params, average=False)
     jmeta_a = jtfs_a.meta()
-    jmeta_u = jtfs_a.meta()
+    jmeta_u = jtfs_u.meta()
 
     # scatter
     Scx_a = jtfs_a(x)
@@ -885,7 +885,6 @@ def test_energy_conservation():
     pe_a, pe_u = [{pair: np.sum(pe[pair]) for pair in pe}
                   for pe in (pair_energies_a, pair_energies_u)]
 
-    # run assertions
     # compute energy relations ###############################################
     E = {}
     E['in'] = energy(x)
@@ -919,6 +918,18 @@ def test_energy_conservation():
     assert .95 < r['(S0 + U1) / in'] < 1., r['(S0 + U1) / in']
     assert .95 < r['S1_joint / S1']  < 1., r['S1_joint / S1']
     assert .83 < r['U2_joint / U2']  < 1., r['U2_joint / U2']
+
+
+def test_est_energy_conservation():
+    """Tests that `toolkit.est_energy_conservation` doesn't error."""
+    N = 256
+    x = np.random.randn(N)
+
+    kw = dict(verbose=1, analytic=1)
+    print()
+    _ = est_energy_conservation(x, jtfs=0, **kw)
+    print()
+    _ = est_energy_conservation(x, jtfs=1, **kw)
 
 
 def test_implementation():
@@ -1516,6 +1527,7 @@ if __name__ == '__main__':
         test_tensor_padded()
         test_pack_coeffs_jtfs()
         test_energy_conservation()
+        test_est_energy_conservation()
         test_implementation()
         test_pad_mode_fr()
         test_backends()

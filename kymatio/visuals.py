@@ -214,7 +214,7 @@ def filterbank_scattering(scattering, zoom=0, filterbank=True, lp_sum=False,
                 plot_kw['title'] = ("Littlewood-Paley sum", {'fontsize': 18})
             fig, ax = plt.subplots(1, 1)
             plot(lp, **plot_kw, show=0, w=.68, ax=ax, h=.85,
-                 hlines=(1, dict(color='tab:red', linestyle='--')),
+                 hlines=(2, dict(color='tab:red', linestyle='--')),
                  vlines=(Nmax//2, dict(color='k', linewidth=1)))
             _filterbank_style_axes(ax, N, xlims, ymax=lp.max()*1.03)
             plt.show()
