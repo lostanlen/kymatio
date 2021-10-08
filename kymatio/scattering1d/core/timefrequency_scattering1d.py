@@ -105,7 +105,7 @@ def timefrequency_scattering1d(
           - ind_end_fr, ind_end_fr_max
     """
     """
-    In regular scattering, log2_T controls maximum total subsampling upon
+    In regular scattering, `log2_T` controls maximum total subsampling upon
     padded input; if padding beyond nextpow2, will unpad more, not subsample more
 
     Any reason for `total_conv_stride_over_U1` to not equal `log2_F`?
@@ -892,7 +892,7 @@ def timefrequency_scattering1d(
     # pack outputs & return
     out = {}
     out['S0'] = out_S_0
-    out['S1'] = out_S_1_tm  # TODO rename key to S1_tm
+    out['S1'] = out_S_1_tm
     out['phi_t * phi_f'] = out_S_1['phi_t * phi_f']
     out['phi_t * psi_f'] = out_S_2['phi_t * psi_f'][0]
     out['psi_t * phi_f'] = out_S_2['psi_t * phi_f']

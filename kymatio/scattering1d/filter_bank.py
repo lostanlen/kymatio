@@ -940,7 +940,7 @@ def psi_fr_factory(J_pad_frs_max_init, J_fr, Q_fr, N_frs, N_fr_scales_max,
         Largest permitted `max(sigma) / min(sigma)`.
         See `help(TimeFrequencyScattering1D)`.
 
-    r_psi_fr, normalize, criterion_amplitude, sigma0, alpha, P_max, eps:
+    r_psi_fr, normalize_fr, criterion_amplitude, sigma0, alpha, P_max, eps:
         See `help(kymatio.scattering1d.filter_bank.scattering_filter_factory)`.
 
     Returns
@@ -954,9 +954,9 @@ def psi_fr_factory(J_pad_frs_max_init, J_fr, Q_fr, N_frs, N_fr_scales_max,
 
         These filters are not subsampled, as they do not receive subsampled
         inputs (but their *outputs*, i.e. convolutions, can be subsampled).
-        The kind of downsampling done is controlled by `sampling_psi_fr`
-        (but it is *never* subsampling). Downsampling is indexed by `j`
-        (rather, `subsample_equiv_due_to_pad`).
+        Downsampling is always a *trimming*, not a subsampling, and amount
+        is determined by filter `xi` and `sigma`, controlled by `sampling_psi_fr`.
+        Downsampling is indexed by `j` (rather, `subsample_equiv_due_to_pad`).
 
         Example (`J_fr = 2`, `n1_fr = 8`, lists hold subsampling factors):
             - 'resample':
@@ -1220,10 +1220,9 @@ def psi_fr_factory(J_pad_frs_max_init, J_fr, Q_fr, N_frs, N_fr_scales_max,
     return psi1_f_fr_up, psi1_f_fr_down, j0_max
 
 
-def phi_fr_factory(J_pad_frs_max_init, F, log2_F,
-                   N_fr_scales_min, N_fr_scales_max, unrestricted_pad_fr,
-                   sampling_phi_fr='resample', criterion_amplitude=1e-3,
-                   sigma0=0.1, P_max=5, eps=1e-7):
+def phi_fr_factory(J_pad_frs_max_init, F, log2_F, N_fr_scales_min,
+                   unrestricted_pad_fr, sampling_phi_fr='resample',
+                   criterion_amplitude=1e-3, sigma0=0.1, P_max=5, eps=1e-7):
     """
     Builds in Fourier the lowpass Gabor filters used for JTFS.
 
@@ -1370,14 +1369,14 @@ def phi_fr_factory(J_pad_frs_max_init, F, log2_F,
         phi_f_fr['width'][j0] = []
         phi_f_fr['support'][j0] = []
         for j0_sub in range(len(phi_f_fr[j0])):
-            # should halve with subsequent j0_sub, but compute exactly
+            # should halve with subsequent j0_sub, but compute exactly.
             # `j0`-to-`N_fr` uniqueness asserted in `psi_fr_factory`
-            N_j0 = 2**(N_fr_scales_max - j0_sub)
+            phi = phi_f_fr[j0][j0_sub]
             width = compute_temporal_width(
-                phi_f_fr[j0][j0_sub], N=N_j0, sigma0=sigma0,
+                phi, N=len(phi), sigma0=sigma0,
                 criterion_amplitude=criterion_amplitude)
             support = 2*compute_temporal_support(
-                phi_f_fr[j0][j0_sub], criterion_amplitude=criterion_amplitude)
+                phi, criterion_amplitude=criterion_amplitude)
             phi_f_fr['width'][j0].append(width)
             phi_f_fr['support'][j0].append(support)
 
