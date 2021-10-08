@@ -9,7 +9,7 @@ from kymatio.toolkit import (drop_batch_dim_jtfs, jtfs_to_numpy, coeff_energy,
                              fdts, echirp, coeff_energy_ratios,
                              est_energy_conservation, rel_l2, rel_ae,
                              validate_filterbank_tm, validate_filterbank_fr,
-                             pack_coeffs_jtfs, tensor_padded)
+                             pack_coeffs_jtfs, tensor_padded, normalize)
 from kymatio.visuals import (coeff_distance_jtfs, compare_distances_jtfs,
                              energy_profile_jtfs)
 from kymatio.scattering1d.filter_bank import compute_temporal_width, gauss_1d
@@ -990,6 +990,39 @@ def test_pad_mode_fr():
     assert np.allclose(out0, out1)
 
 
+def test_normalize():
+    """Ensure no error."""
+    for rscaling in ('l1', 'l2'):
+      for mean_axis in (0, (1, 2), -1):
+        for std_axis in (0, (1, 2), -1):
+          for C in (None, 2):
+            for mu in (None, 2):
+              for dim0 in (1, 64):
+                for dim1 in (1, 65):
+                  for dim2 in (1, 66):
+                      x = np.random.randn(dim0, dim1, dim2)
+                      test_params = dict(
+                          rscaling=rscaling, mean_axis=mean_axis,
+                          std_axis=std_axis, C=C, mu=mu, dim0=dim0, dim1=dim1,
+                          dim2=dim2)
+                      test_params_str = '\n'.join(f'{k}={v}' for k, v in
+                                                  test_params.items())
+                      try:
+                          kw = test_params.copy()
+                          for k in ('dim0', 'dim1', 'dim2'):
+                              kw.pop(k)
+                          if any(d == 1 for d in (dim0, dim1, dim2)):
+                              # will complain about zero division per zero
+                              # statistics along length-one axis
+                              with warnings.catch_warnings():
+                                  _ = normalize(x, **kw)
+                          else:
+                            _ = normalize(x, **kw)
+                      except Exception as e:
+                          print(test_params_str)
+                          raise e
+
+
 def test_no_second_order_filters():
     """Reproduce edge case: configuration yields no second-order wavelets
     so can't do JTFS.
@@ -1581,6 +1614,7 @@ if __name__ == '__main__':
         test_est_energy_conservation()
         test_implementation()
         test_pad_mode_fr()
+        test_normalize()
         test_backends()
         test_differentiability_torch()
         test_reconstruction_torch()

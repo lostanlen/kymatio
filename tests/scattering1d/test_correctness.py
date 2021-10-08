@@ -93,6 +93,9 @@ def _test_pad_axis(backend_name):
     kw = dict(pad_left=pad_left, pad_right=pad_right, pad_mode='reflect')
 
     for axis in range(x.ndim):
+        if backend_name == 'tensorflow' and axis != x.ndim - 1:
+            # implemented only for last axis
+            continue
         shape0 = list(x.shape)
         shape0[axis] += (pad_left + pad_right)
         shape1 = pad(x, axis=axis, **kw).shape
@@ -108,8 +111,10 @@ def _test_subsample_fourier_axis(backend_name):
     B = _get_kymatio_backend(backend_name)
     x = np.random.randn(4, 8, 16, 32)
 
-    if backend_name != 'numpy':
+    if backend_name == 'torch':
         xb = backend.tensor(x)
+    elif backend_name == 'tensorflow':
+        xb = backend.cast(backend.convert_to_tensor(x), backend.complex64)
     else:
         xb = x
 
@@ -117,13 +122,18 @@ def _test_subsample_fourier_axis(backend_name):
     axis = 3
     for k in (2, 4):
         for axis in range(x.ndim):
+            if (backend_name == 'tensorflow' and
+                    axis not in (x.ndim - 1, x.ndim - 2)):
+                # not implemented
+                continue
             xf = B.fft(xb, axis=axis)
             outf = B.subsample_fourier(xf, k, axis=axis)
-            out = B.ifft(outf, axis=axis).real
+            out = B.ifft(outf, axis=axis)
 
             xref = xb[stride_axis(k, axis, xb.ndim)]
             if backend_name != 'numpy':
                 out = out.numpy()
+            out = out.real
             assert np.allclose(xref, out, atol=5e-7), np.abs(xref - out).max()
 
 

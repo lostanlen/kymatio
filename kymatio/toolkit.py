@@ -2283,6 +2283,8 @@ class ExtendedUnifiedBackend():
         else:
             if hasattr(x, 'to') and 'cpu' not in x.device.type:
                 x = x.cpu()
+            if getattr(x, 'requires_grad', False):
+                x = x.detach()
             out = x.numpy()
         return out
 
