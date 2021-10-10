@@ -688,10 +688,11 @@ def scattering_filter_factory(J_support, J_scattering, Q, T,
     T : int
         temporal support of low-pass filter, controlling amount of imposed
         time-shift invariance and maximum subsampling
-    r_psi : float, optional
+    r_psi : float / tuple[float], optional
         Should be >0 and <1. Controls the redundancy of the filters
         (the larger r_psi, the larger the overlap between adjacent wavelets).
         Defaults to sqrt(0.5).
+        Tuple sets separately for first- and second-order filters.
     criterion_amplitude : float, optional
         Represents the numerical error which is allowed to be lost after
         convolution and padding. Defaults to 1e-3.
