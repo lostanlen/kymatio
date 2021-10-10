@@ -267,19 +267,6 @@ class ScatteringBase1D(ScatteringBase):
             The maximum realizable value is `4`: a filter of scale `j` requires
             `2**(j + 4)` samples to convolve without boundary effects, i.e. x16
             the scale, and the largest permissible `J` or `log2_T` is `log2(N)`.
-        average_global_phi : bool
-            True if `T == nextpow2(shape)`, i.e. `T` is maximum possible
-            and equivalent to global averaging, in which case lowpassing is
-            replaced by simple arithmetic mean.
-
-            In case of `average==False`, controls scattering logic for
-            `phi_t` pairs in JTFS.
-        average_global : bool
-            True if `average_global_phi and average_fr`. Same as
-            `average_global_phi` if `average_fr==True`.
-
-            In case of `average==False`, controls scattering logic for
-            `psi_t` pairs in JTFS.
         normalize : str
             One of:
 
@@ -330,6 +317,19 @@ class ScatteringBase1D(ScatteringBase):
         analytic : bool (default False)
             If True, will force negative frequencies to zero. Useful if
             strict analyticity is desired, but may worsen time-domain decay.
+        average_global_phi : bool
+            True if `T == nextpow2(shape)`, i.e. `T` is maximum possible
+            and equivalent to global averaging, in which case lowpassing is
+            replaced by simple arithmetic mean.
+
+            In case of `average==False`, controls scattering logic for
+            `phi_t` pairs in JTFS.
+        average_global : bool
+            True if `average_global_phi and average_fr`. Same as
+            `average_global_phi` if `average_fr==True`.
+
+            In case of `average==False`, controls scattering logic for
+            `psi_t` pairs in JTFS.
         """
 
     _doc_class = \
