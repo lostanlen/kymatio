@@ -238,8 +238,9 @@ def timefrequency_scattering1d(
                 to ensure this).
             f. `freq` <= 0 isn't possible because we always have
                `pad_fr == J_pad_frs_max == J_pad_frs_max_init` (or equivalently
-               `pad_fr == J_pad_frs_max <= J_pad_frs_max_init` if not `True, True`,
-               where `J_pad_frs_max >= log2_N_fr`, and `log2_F <= log2_N_fr` (D2)).
+               `pad_fr == J_pad_frs_max <= J_pad_frs_max_init` if not
+               `True, True`, where `J_pad_frs_max >= log2_N_fr`, and
+               `log2_F <= log2_N_fr` (D2)).
             g. `max(..., 0)` isn't necessary since `n1_fr_subsample <= log2_F`
                is enforced (to avoid aliased `phi_fr`, note a;
                `subsample_equiv_due_to_pad + n1_fr_subsample` may exceed `log2_F`,
@@ -360,7 +361,8 @@ def timefrequency_scattering1d(
            (this holds by definition; can plug expressions, but this is cleaner)
             i. `total_downsample_fr` can exceed `log2_F` because we can have
                `pad_fr < J_pad_frs_max == J_pad_frs_max_init` (or equivalently
-               `pad_fr < J_pad_frs_max <= J_pad_frs_max_init` for not `True, True`).
+               `pad_fr < J_pad_frs_max <= J_pad_frs_max_init` for
+               not `True, True`).
                (`subsample_equiv_due_to_pad == J_pad_frs_max_init - pad_fr` is
                the generalization of `diff` (see e.g. A2g))
 
@@ -416,7 +418,7 @@ def timefrequency_scattering1d(
         ```
         accounts for 1-4.
           - `phi_fr_sub_at_min == log2_F` for 1,2 and we reduce to
-            `lowpass_subsample_fr == min(log2_F, J_pad_frs_min) - n1_fr_subsample`.
+            `lowpass_subsample_fr == min(log2_F, J_pad_frs_min) - n1_fr_subsample`
           - `phi_fr_sub_at_min == log2_F - diffmin <= J_pad_frs_min` for 3,4.
 
         ```
