@@ -962,6 +962,10 @@ class TimeFrequencyScatteringBase1D():
         (Thus, 3==2 except for shape). Requires `out_type` 'dict:list' (default)
         or 'dict:array'; if 'dict:array' is passed, will use it instead.
 
+        `5` also makes sense with `sampling_phi_fr = 'resample'` and small `F`
+        (small enough to let `J_pad_frs` drop below max), but the argument
+        will only set `'recalibrate'`.
+
     average_fr : bool (default False)
         Whether to average (lowpass) along frequency axis.
 
@@ -1026,7 +1030,7 @@ class TimeFrequencyScatteringBase1D():
               and reused across `n2` (even with less subsampling).
 
     sampling_filters_fr : str / tuple[str]
-        Controls filter properties for input lengths below maximum.
+        Controls filter properties for (frequential) input lengths below maximum.
 
           - 'resample': preserve physical dimensionality (center frequeny, width)
             at every length (trimming in time domain).
