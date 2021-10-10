@@ -295,8 +295,12 @@ class ScatteringBase1D(ScatteringBase):
                   per using only analytic filters, without anti-analytic).
                   This improves "even-ness" of input's representation, i.e.
                   no frequency is tiled too great or little.
-        r_psi : float / tuple[float]
-            See `help(kymatio.scattering1d.utils.calibrate_scattering_filters)`.
+        r_psi : float / tuple[float], optional
+            Should be >0 and <1. Controls the redundancy of the filters
+            (the larger r_psi, the larger the overlap between adjacent wavelets),
+            and stability against time-warp deformations (larger r_psi improves it).
+            Defaults to sqrt(0.5).
+            Tuple sets separately for first- and second-order filters.
         """
 
     _doc_attr_vectorize = \

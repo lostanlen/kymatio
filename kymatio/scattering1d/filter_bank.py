@@ -501,7 +501,8 @@ def compute_params_filterbank(sigma_min, Q, r_psi=math.sqrt(0.5), alpha=4.,
         number of wavelets per octave.
     r_psi : float, optional
         Should be >0 and <1. Controls the redundancy of the filters
-        (the larger r_psi, the larger the overlap between adjacent wavelets).
+        (the larger r_psi, the larger the overlap between adjacent wavelets),
+        and stability against time-warp deformations (larger r_psi improves it).
         Defaults to sqrt(0.5).
     alpha : float, optional
         tolerance factor for the aliasing after subsampling.
@@ -602,7 +603,8 @@ def calibrate_scattering_filters(J, Q, T, r_psi=math.sqrt(0.5), sigma0=0.1,
         time-shift invariance and maximum subsampling
     r_psi : float / tuple[float], optional
         Should be >0 and <1. Controls the redundancy of the filters
-        (the larger r_psi, the larger the overlap between adjacent wavelets).
+        (the larger r_psi, the larger the overlap between adjacent wavelets),
+        and stability against time-warp deformations (larger r_psi improves it).
         Defaults to sqrt(0.5).
         Tuple sets separately for first- and second-order filters.
     sigma0 : float, optional
@@ -690,7 +692,8 @@ def scattering_filter_factory(J_support, J_scattering, Q, T,
         time-shift invariance and maximum subsampling
     r_psi : float / tuple[float], optional
         Should be >0 and <1. Controls the redundancy of the filters
-        (the larger r_psi, the larger the overlap between adjacent wavelets).
+        (the larger r_psi, the larger the overlap between adjacent wavelets),
+        and stability against time-warp deformations (larger r_psi improves it).
         Defaults to sqrt(0.5).
         Tuple sets separately for first- and second-order filters.
     criterion_amplitude : float, optional
