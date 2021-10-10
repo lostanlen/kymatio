@@ -316,10 +316,12 @@ class ScatteringBase1D(ScatteringBase):
             output is a list of dictionaries, each containing a scattering
             coefficient along with meta information. For more information, see
             the documentation for `scattering`.
-        pad_mode : str (default 'reflect'), optional
-            One of supported padding modes:
-                - zero:    [0,0,0,0, 1,2,3,4, 0,0,0]
-                - reflect: [3,4,3,2, 1,2,3,4, 3,2,1]
+        pad_mode : str
+            One of supported padding modes: 'reflect', 'zero' - or 'custom'
+            if a function was passed.
+        pad_fn : function
+            A backend padding function, or user function (as passed
+            to `pad_mode`), with signature `pad_fn(x, pad_left, pad_right)`.
         max_pad_factor : int (default 2) / None, optional
             Will pad by at most `2**max_pad_factor` relative to `nextpow2(shape)`.
             E.g. if input length is 150, then maximum padding with
