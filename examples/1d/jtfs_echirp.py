@@ -1,6 +1,6 @@
 """
-Compute the Joint Time-Frequency Scattering of a synthetic signal
-=================================================================
+Joint Time-Frequency Scattering of a synthetic signal
+=====================================================
 
 We compute and visualize JTFS of an exponential chirp and illustrate
 FDTS-(frequency-dependent time shifts) discriminability.
