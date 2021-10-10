@@ -285,7 +285,8 @@ class ScatteringBase1D(ScatteringBase):
         r_psi : float / tuple[float], optional
             Should be >0 and <1. Controls the redundancy of the filters
             (the larger r_psi, the larger the overlap between adjacent wavelets),
-            and stability against time-warp deformations (larger r_psi improves it).
+            and stability against time-warp deformations
+            (larger r_psi improves it).
             Defaults to sqrt(0.5).
             Tuple sets separately for first- and second-order filters.
         """
@@ -345,9 +346,11 @@ class ScatteringBase1D(ScatteringBase):
 
             $S_J^{{(0)}} x(t) = x \star \phi_J(t)$,
 
-            $S_J^{{(1)}} x(t, \lambda) = |x \star \psi_\lambda^{{(1)}}| \star \phi_J$, and
+            $S_J^{{(1)}} x(t, \lambda) = |x \star \psi_\lambda^{{(1)}}|
+            \star \phi_J$, and
 
-            $S_J^{{(2)}} x(t, \lambda, \mu) = |\,| x \star \psi_\lambda^{{(1)}}| \star \psi_\mu^{{(2)}} | \star \phi_J$.
+            $S_J^{{(2)}} x(t, \lambda, \mu) = |\,| x \star \psi_\lambda^{{(1)}}|
+            \star \psi_\mu^{{(2)}} | \star \phi_J$.
 
         In the above formulas, :math:`\star` denotes convolution in time. The
         filters $\psi_\lambda^{{(1)}}(t)$ and $\psi_\mu^{{(2)}}(t)$ are analytic
@@ -497,7 +500,8 @@ class ScatteringBase1D(ScatteringBase):
 
         param_average = cls._doc_param_average if cls._doc_has_out_type else ''
         attr_average = cls._doc_attr_average if cls._doc_has_out_type else ''
-        param_vectorize = cls._doc_param_vectorize if cls._doc_has_out_type else ''
+        param_vectorize = (cls._doc_param_vectorize if cls._doc_has_out_type else
+                           '')
         attr_vectorize = cls._doc_attr_vectorize if cls._doc_has_out_type else ''
 
         cls.__doc__ = ScatteringBase1D._doc_class.format(
