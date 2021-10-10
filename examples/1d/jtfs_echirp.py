@@ -44,8 +44,8 @@ pad_mode_fr = 'zero'
 # return packed as dict keyed by pair names for easy inspection
 out_type = 'dict:array'
 
-params = dict(J=J, Q=Q, T=T, J_fr=J_fr, Q_fr=Q_fr, F=F, average_fr=average_fr,
-              out_type=out_type, pad_mode_fr=pad_mode_fr)
+params = dict(J=J, Q=Q, T=T, J_fr=J_fr, Q_fr=Q_fr, F=F, out_type=out_type,
+              average_fr=average_fr, pad_mode_fr=pad_mode_fr)
 jtfs = TimeFrequencyScattering1D(shape=N, **params)
 
 ###############################################################################
@@ -56,7 +56,9 @@ print("JTFS pairs:")
 for pair in Scx:
     print("{:<12} -- {}".format(str(Scx[pair].shape), pair))
 
-# Show `x` and its (time-averaged) scalogram ##################################
+###############################################################################
+# Show `x` and its (time-averaged) scalogram
+# ------------------------------------------
 plot(x, show=1,
      xlabel="time [samples]",
      title="Exponential chirp | fmin=64, fmax=2048, 4096 samples")
@@ -68,14 +70,17 @@ imshow(Scx['S1'].squeeze(), abs=1,
 ###############################################################################
 # Create & save GIF
 # =================
+
 # fetch meta (structural info)
 jmeta = jtfs.meta()
 # specify save folder
 savedir = ''
 # time between GIF frames (ms)
 duration = 200
-visuals.gif_jtfs_2d(Scx, jmeta, savedir=savedir, save_images=0, overwrite=1,
-                 gif_kw={'duration': duration})
+visuals.gif_jtfs_2d(Scx, jmeta, savedir=savedir, save_images=0, verbose=1,
+                    overwrite=1, gif_kw={'duration': duration})
+
+###############################################################################
 # Notice how -1 spin coefficients contain nearly all the energy
 # and +1 barely any; this is FDTS discriminability.
 # For ideal FDTS and JTFS, +1 will be all zeros.
