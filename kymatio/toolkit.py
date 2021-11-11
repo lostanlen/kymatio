@@ -384,6 +384,9 @@ def pack_coeffs_jtfs(Scx, meta, structure=1, sample_idx=None,
     Structures not suited for convolutions may be suited for other transforms,
     e.g. Dense or Graph Neural Networks.
 
+    Helpful visuals:
+      https://github.com/kymatio/kymatio/discussions/708#discussioncomment-1624521
+
     Ordinality
     ----------
     Coefficients are "ordinal" if their generating wavelets are spaced linearly

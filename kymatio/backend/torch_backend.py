@@ -126,6 +126,8 @@ class TorchBackend:
             out = (torch.conj(x) if torch110 else
                    torch.conj(x, out=x))
         else:
+            if torch110:
+                x = x.detach().clone()
             out = (torch.conj(x) if cls._is_complex(x) else
                    x)
         return out
