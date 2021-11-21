@@ -22,7 +22,7 @@ class ScatteringBase1D(ScatteringBase):
             max_pad_factor=2, analytic=False, normalize='l1-energy',
             r_psi=math.sqrt(.5), backend=None):
         super(ScatteringBase1D, self).__init__()
-        self.J = J
+        self.J = J if isinstance(J, tuple) else (J, J)
         self.shape = shape
         self.Q = Q if isinstance(Q, tuple) else (Q, 1)
         self.T = T
@@ -86,15 +86,17 @@ class ScatteringBase1D(ScatteringBase):
             raise ValueError("unsupported `normalize`; must be one of: %s"
                              + ", ".join(supported))
 
+        # ensure J2 <= J1
+        assert self.J[1] <= self.J[0], self.J
         # ensure 2**J <= nextpow2(N)
         mx = 2**math.ceil(math.log2(self.N))
-        if 2**(self.J) > mx:
+        if 2**(self.J[0]) > mx:
             raise ValueError(("2**J cannot exceed input length (rounded up to "
-                              "pow2) (got {} > {})".format(2**(self.J), mx)))
+                              "pow2) (got {} > {})".format(2**(self.J[0]), mx)))
 
         # check T or set default
         if self.T is None:
-            self.T = 2**(self.J)
+            self.T = 2**(self.J[0])
         elif self.T == 'global':
             self.T == mx
         elif self.T > self.N:
@@ -107,7 +109,7 @@ class ScatteringBase1D(ScatteringBase):
 
         # Compute the minimum support to pad (ideally)
         min_to_pad, pad_phi, pad_psi1, pad_psi2 = compute_minimum_support_to_pad(
-            self.N, self.J, self.Q, self.T, r_psi=self.r_psi,
+            self.N, self.J[0], self.Q, self.T, r_psi=self.r_psi,
             sigma0=self.sigma0, alpha=self.alpha, P_max=self.P_max, eps=self.eps,
             criterion_amplitude=self.criterion_amplitude,
             normalize=self.normalize, pad_mode=self.pad_mode)
@@ -124,7 +126,7 @@ class ScatteringBase1D(ScatteringBase):
         self.pad_left, self.pad_right = compute_padding(self.J_pad, self.N)
         # compute start and end indices
         self.ind_start, self.ind_end = compute_border_indices(
-            self.log2_T, self.J, self.pad_left, 2**self.J_pad - self.pad_right)
+            self.log2_T, self.J[0], self.pad_left, 2**self.J_pad - self.pad_right)
 
         # record whether configuration yields second order filters
         meta = ScatteringBase1D.meta(self)
@@ -676,7 +678,7 @@ class TimeFrequencyScatteringBase1D():
             if not isinstance(k, int):
                 phi_f[k] = v
 
-        diff = min(self.J - self.log2_T, self.J_pad - self.N_scale)
+        diff = min(self.J[0] - self.log2_T, self.J_pad - self.N_scale)
         if diff > 0:
             for trim_tm in range(1, diff + 1):
                 # subsample in Fourier <-> trim in time
@@ -691,7 +693,7 @@ class TimeFrequencyScatteringBase1D():
                 pad_left, pad_right = compute_padding(self.J_pad - trim_tm,
                                                       self.N)
                 start, end = compute_border_indices(
-                    self.log2_T, self.J, pad_left, pad_left + self.N)
+                    self.log2_T, self.J[0], pad_left, pad_left + self.N)
                 ind_start[trim_tm] = start
                 ind_end[trim_tm] = end
         self.ind_start, self.ind_end = ind_start, ind_end

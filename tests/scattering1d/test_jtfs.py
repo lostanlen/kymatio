@@ -243,8 +243,9 @@ def test_up_vs_down():
     l2_th = (85, 470)
     for i, pad_mode in enumerate(['reflect', 'zero']):
         pad_mode_fr = 'conj-reflect-zero' if pad_mode == 'reflect' else 'zero'
-        jtfs = TimeFrequencyScattering1D(shape=N, J=8, Q=16, J_fr=4, F=4, Q_fr=2,
-                                         average_fr=True, out_type='dict:array',
+        jtfs = TimeFrequencyScattering1D(shape=N, J=(8, 6), Q=16, J_fr=4, F=4,
+                                         Q_fr=2, average_fr=True,
+                                         out_type='dict:array',
                                          pad_mode=pad_mode,
                                           sampling_filters_fr=(
                                               'resample', 'resample'),
@@ -1056,7 +1057,7 @@ def test_backends():
         x = (tf.constant(x) if backend_name == 'tensorflow' else
              torch.from_numpy(x))
 
-        jtfs = TimeFrequencyScattering1D(shape=N, J=8, Q=8, J_fr=3, Q_fr=1,
+        jtfs = TimeFrequencyScattering1D(shape=N, J=(8, 6), Q=8, J_fr=3, Q_fr=1,
                                          average_fr=True, out_type='dict:array',
                                          out_3D=True, frontend=backend_name)
         Scx = jtfs(x)
@@ -1466,6 +1467,7 @@ def test_meta():
 
     # make scattering objects
     J = int(np.log2(N) - 1)  # have 2 time units at output
+    J = (J, J - 1)
     Q = (16, 1)
     J_fr = 5
     Q_fr = 2

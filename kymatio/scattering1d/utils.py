@@ -845,7 +845,7 @@ def compute_meta_jtfs(J_pad, J, Q, J_fr, Q_fr, T, F, aligned, out_3D, out_type,
 
     # ensure time / freq stride doesn't exceed log2_T / log2_F in averaged cases,
     # and J / J_fr in unaveraged
-    smax_t_nophi = log2_T if average else J
+    smax_t_nophi = log2_T if average else J[0]
     smax_f_nophi = log2_F if scf.average_fr else scf.J_fr
     for pair in meta['stride']:
         if pair == 'S0' and not average:

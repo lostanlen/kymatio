@@ -635,18 +635,20 @@ def calibrate_scattering_filters(J, Q, T, r_psi=math.sqrt(0.5), sigma0=0.1,
         `xi1, sigma1, j1, is_cqt1` for second order filters.
     """
     Q1, Q2 = Q if isinstance(Q, tuple) else (Q, 1)
+    J1, J2 = J if isinstance(J, tuple) else (J, J)
     r_psi1, r_psi2 = r_psi if isinstance(r_psi, tuple) else (r_psi, r_psi)
     if Q1 < 1 or Q2 < 1:
         raise ValueError('Q should always be >= 1, got {}'.format(Q))
 
     # lower bound of band-pass filter frequential widths:
     # for default T = 2**(J), this coincides with sigma_low
-    sigma_min = sigma0 / math.pow(2, J)
+    sigma_min1 = sigma0 / math.pow(2, J1)
+    sigma_min2 = sigma0 / math.pow(2, J2)
 
     xi1s, sigma1s, j1s, is_cqt1s = compute_params_filterbank(
-        sigma_min, Q1, r_psi=r_psi1, alpha=alpha, xi_min=xi_min)
+        sigma_min1, Q1, r_psi=r_psi1, alpha=alpha, xi_min=xi_min)
     xi2s, sigma2s, j2s, is_cqt2s = compute_params_filterbank(
-        sigma_min, Q2, r_psi=r_psi2, alpha=alpha, xi_min=xi_min)
+        sigma_min2, Q2, r_psi=r_psi2, alpha=alpha, xi_min=xi_min)
 
     # width of the low-pass filter
     sigma_low = sigma0 / T
@@ -1395,12 +1397,12 @@ def energy_norm_filterbank_tm(psi1_f, psi2_f, phi_f, J, log2_T):
     """
     # in case of `trim_tm` for JTFS
     phi = phi_f[0][0] if isinstance(phi_f[0], list) else phi_f[0]
-    kw = dict(phi_f=phi, J=J, log2_T=log2_T)
+    kw = dict(phi_f=phi, log2_T=log2_T)
     psi1_f0 = [p[0] for p in psi1_f]
     psi2_f0 = [p[0] for p in psi2_f]
 
-    energy_norm_filterbank(psi1_f0, **kw)
-    scaling_factors2 = energy_norm_filterbank(psi2_f0, **kw)
+    energy_norm_filterbank(psi1_f0, J=J[0], **kw)
+    scaling_factors2 = energy_norm_filterbank(psi2_f0, J=J[1], **kw)
 
     # apply unsubsampled scaling factors on subsampled
     for n2 in range(len(psi2_f)):
