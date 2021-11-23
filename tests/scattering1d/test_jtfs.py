@@ -945,7 +945,7 @@ def test_energy_conservation():
     assert .9  < r['out / in']       < 1., r['out / in']
     assert .95 < r['(S0 + U1) / in'] < 1., r['(S0 + U1) / in']
     assert .93 < r['S1_joint / S1']  < 1., r['S1_joint / S1']
-    assert .83 < r['U2_joint / U2']  < 1., r['U2_joint / U2']
+    assert .9  < r['U2_joint / U2']  < 1., r['U2_joint / U2']
 
 
 def test_est_energy_conservation():

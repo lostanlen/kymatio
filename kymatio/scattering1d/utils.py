@@ -753,7 +753,7 @@ def compute_meta_jtfs(J_pad, J, Q, J_fr, Q_fr, T, F, aligned, out_3D, out_type,
         meta['key'   ]['S1'].append((0, 0, n1))
 
     S1_len = len(meta['n']['S1'])
-    assert S1_len >= scf.N_frs_max
+    assert S1_len >= scf.N_frs_max, (S1_len, scf.N_frs_max)
 
     # Joint scattering #######################################################
     # `phi_t * phi_f` coeffs

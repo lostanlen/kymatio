@@ -778,7 +778,7 @@ def scattering_filter_factory(J_support, J_scattering, Q, T,
         # which depends on the input it can accept.
         if max_subsampling is None:
             possible_subsamplings_after_order1 = [
-                j1 for j1 in j1s if j2 > j1]
+                j1 for j1 in j1s if j2 >= j1]
             if len(possible_subsamplings_after_order1) > 0:
                 max_sub_psi2 = max(possible_subsamplings_after_order1)
             else:

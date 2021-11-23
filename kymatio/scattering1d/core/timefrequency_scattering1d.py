@@ -816,7 +816,7 @@ def timefrequency_scattering1d(
             for n1 in range(len(psi1)):
                 # Retrieve first-order coefficient in the list
                 j1 = psi1[n1]['j']
-                if j1 >= j2:
+                if j1 > j2 or len(Y_2_list) == scf.N_frs[n2]:
                     continue
                 U_1_hat = U_1_hat_list[n1]
 

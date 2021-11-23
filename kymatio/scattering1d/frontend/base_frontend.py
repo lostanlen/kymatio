@@ -654,9 +654,18 @@ class TimeFrequencyScatteringBase1D():
         for n2 in range(len(self.psi2_f)):
             j2 = self.psi2_f[n2]['j']
             max_freq_nrows = 0
-            for n1 in range(len(self.psi1_f)):
-                if j2 > self.psi1_f[n1]['j']:
-                    max_freq_nrows += 1
+            if j2 != 0:
+                for n1 in range(len(self.psi1_f)):
+                    if j2 > self.psi1_f[n1]['j']:
+                        max_freq_nrows += 1
+                # add rows for `j2 >= j1` up to `nextpow2` of current number
+                # to not change frequential padding scales
+                max_freq_nrows_at_2gt1 = max_freq_nrows
+                p2up_nrows = int(2**math.ceil(math.log2(max_freq_nrows_at_2gt1)))
+                for n1 in range(len(self.psi1_f)):
+                    if (j2 == self.psi1_f[n1]['j'] and
+                            max_freq_nrows < p2up_nrows):
+                        max_freq_nrows += 1
             N_frs.append(max_freq_nrows)
         return N_frs
 
