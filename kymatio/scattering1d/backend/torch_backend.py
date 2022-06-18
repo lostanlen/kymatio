@@ -4,7 +4,7 @@ from ...backend.torch_backend import TorchBackend
 
 from packaging import version
 
-if version.parse(torch.__version__) >= version.parse('1.8'):
+if version.parse(torch.__version__) >= version.parse('1.7'):
     _fft = lambda x: torch.view_as_real(torch.fft.fft(torch.view_as_complex(x)))
     _ifft = lambda x: torch.view_as_real(torch.fft.ifft(torch.view_as_complex(x)))
     _irfft = lambda x: torch.fft.ifft(torch.view_as_complex(x)).real[..., None]

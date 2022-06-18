@@ -7,7 +7,7 @@ from packaging import version
 from ...backend.torch_backend import TorchBackend
 
 
-if version.parse(torch.__version__) >= version.parse('1.8'):
+if version.parse(torch.__version__) >= version.parse('1.7'):
     def _fft(input, inverse=False):
         """Interface with torch FFT routines for 3D signals.
             fft of a 3d signal
