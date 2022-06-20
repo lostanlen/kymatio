@@ -1,5 +1,5 @@
 from ...frontend.base_frontend import ScatteringBase
-from collections import Counter
+from collections import Counter, defaultdict
 import math
 import numbers
 import numpy as np
@@ -98,7 +98,7 @@ class ScatteringBase1D(ScatteringBase):
             r_psi=self.r_psi, sigma0=self.sigma0, alpha=self.alpha)
         ScatteringBase._check_filterbanks(self.psi1_f, self.psi2_f)
 
-    def scattering(self, x):
+    def scattering(self, x, out_format='temporal'):
         ScatteringBase1D._check_runtime_args(self)
         ScatteringBase1D._check_input(self, x)
 
@@ -111,17 +111,17 @@ class ScatteringBase1D(ScatteringBase):
         S_gen = scattering1d(U_0, self.backend, self.psi1_f, self.psi2_f, self.phi_f,
             self.oversampling, self.max_order, average=self.average)
 
-        if self.out_type in ['array', 'list']:
-            S = list()
-        elif self.out_type == 'dict':
-            S = dict()
-
+        S = dict()
+        metas = []
         n_kept_dims = 1 + (self.out_type=='dict')
         for path in S_gen:
+            if self.out_format == 'spectrotemporal' and path['order'] == 0:
+                continue
+
             path['order'] = len(path['n'])
             if self.average:
                 res = self.log2_T
-            elif path['order']>0:
+            elif path['order'] > 0:
                 res = max(path['j'][-1] - self.oversampling, 0)
             else:
                 res = 0
@@ -130,18 +130,35 @@ class ScatteringBase1D(ScatteringBase):
             path['coef'] = self.backend.reshape_output(
                 path['coef'], batch_shape, n_kept_dims=n_kept_dims)
 
-            if self.out_type in ['array', 'list']:
-                S.append(path)
-            elif self.out_type == 'dict':
-                S[path['n']] = path['coef']
+            S[path['n']] = path['coef']
+            meta = {k: v for k, v in path.items() if not k == 'coef'}
+            if self.out_format == 'temporal':
+                metas.append(meta)
+            elif self.out_format == 'spectrotemporal':
+                meta = {k: v[1:] for k, v in meta.items() if not k == 'order'}
+                metas.append(meta.update('order'))
+
+        if self.out_type == 'dict' and self.out_format == 'temporal':
+            return S
+
+        if self.out_format == 'spectrotemporal':
+            S_padded = defaultdict(default_factory=lambda: 0 * path['coef'], S)
+            S = {n2: self.backend.concatenate([
+                    S_padded[(n1, n2)]['coef'] for n1 in range(len(self.psi1_f))
+                    ]) for n2 in range(len(self.psi2_f))}
+            S[()] = self.backend.concatenate([
+                S_padded[n1]['coef'] for n1 in range(len(self.psi1_f))])
 
         if self.out_type == 'dict':
             return S
 
-        S.sort(key=(lambda path: (path['order'], path['n'])))
+        metas.sort(key=(lambda path: (path['order'], path['n'])))
+        S = [path.update({'coef': S[path['n']]} for path in metas]
 
-        if self.out_type == 'array':
+        if self.out_type == 'array' and self.out_format == 'temporal':
             S = self.backend.concatenate([path['coef'] for path in S], dim=-2)
+        elif self.out_type == 'array' and self.out_format == 'spectrotemporal':
+            S = self.backend.concatenate([path['coef'] for path in S], dim=-3)
         elif self.out_type == 'list':
             for n in range(len(S)):
                 S[n].pop('n')
