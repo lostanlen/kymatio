@@ -110,17 +110,17 @@ def precompute_size_scattering(J, Q, T, max_order, r_psi, sigma0, alpha):
     sigma_min = sigma0 / math.pow(2, J)
     Q1, Q2 = Q
 
-    xi1s = [xi1 for xi1, _ in scatnet_generator(J, Q1, r_psi, sigma0)]
-    sigma1s = [sigma1 for _, sigma1 in scatnet_generator(J, Q1, r_psi, sigma0)]
+    xi1s = [xi1 for xi1, _ in scatnet_generator(J, Q1, sigma0, r_psi)]
+    sigma1s = [sigma1 for _, sigma1 in scatnet_generator(J, Q1, sigma0, r_psi)]
     j1s = [
         get_max_dyadic_subsampling(xi1, sigma1, alpha)
-        for xi1, sigma1 in scatnet_generator(J, Q1, r_psi, sigma0)]
+        for xi1, sigma1 in scatnet_generator(J, Q1, sigma0, r_psi)]
 
-    xi2s = [xi2 for xi2, _ in scatnet_generator(J, Q2, r_psi, sigma0)]
-    sigma2s = [sigma2 for _, sigma2 in scatnet_generator(J, Q2, r_psi, sigma0)]
+    xi2s = [xi2 for xi2, _ in scatnet_generator(J, Q2, sigma0, r_psi)]
+    sigma2s = [sigma2 for _, sigma2 in scatnet_generator(J, Q2, sigma0, r_psi)]
     j2s = [
         get_max_dyadic_subsampling(xi2, sigma2, alpha)
-        for xi2, sigma2 in scatnet_generator(J, Q2, r_psi, sigma0)]
+        for xi2, sigma2 in scatnet_generator(J, Q2, sigma0, r_psi)]
 
     sizes = [1, len(xi1s)]
     size_order2 = 0
@@ -192,17 +192,17 @@ def compute_meta_scattering(J, Q, T, max_order, r_psi, sigma0, alpha):
     sigma_min = sigma0 / math.pow(2, J)
     Q1, Q2 = Q
 
-    xi1s = [xi1 for xi1, _ in scatnet_generator(J, Q1, r_psi, sigma0)]
-    sigma1s = [sigma1 for _, sigma1 in scatnet_generator(J, Q1, r_psi, sigma0)]
+    xi1s = [xi1 for xi1, _ in scatnet_generator(J, Q1, sigma0, r_psi)]
+    sigma1s = [sigma1 for _, sigma1 in scatnet_generator(J, Q1, sigma0, r_psi)]
     j1s = [
         get_max_dyadic_subsampling(xi1, sigma1, alpha)
-        for xi1, sigma1 in scatnet_generator(J, Q1, r_psi, sigma0)]
+        for xi1, sigma1 in scatnet_generator(J, Q1, sigma0, r_psi)]
 
-    xi2s = [xi2 for xi2, _ in scatnet_generator(J, Q2, r_psi, sigma0)]
-    sigma2s = [sigma2 for _, sigma2 in scatnet_generator(J, Q2, r_psi, sigma0)]
+    xi2s = [xi2 for xi2, _ in scatnet_generator(J, Q2, sigma0, r_psi)]
+    sigma2s = [sigma2 for _, sigma2 in scatnet_generator(J, Q2, sigma0, r_psi)]
     j2s = [
         get_max_dyadic_subsampling(xi2, sigma2, alpha)
-        for xi2, sigma2 in scatnet_generator(J, Q2, r_psi, sigma0)]
+        for xi2, sigma2 in scatnet_generator(J, Q2, sigma0, r_psi)]
 
     meta = {}
 
