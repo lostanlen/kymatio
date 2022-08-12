@@ -1,6 +1,6 @@
 import numpy as np
 import math
-from .filter_bank import scattering_filter_factory, scatnet_generator, get_max_dyadic_subsampling
+from .filter_bank import scatnet_generator, get_max_dyadic_subsampling
 
 def compute_border_indices(log2_T, J, i0, i1):
     """
