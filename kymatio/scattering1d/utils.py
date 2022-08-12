@@ -1,6 +1,6 @@
 import numpy as np
 import math
-from .filter_bank import scattering_filter_factory, compute_params_filterbank
+from .filter_bank import scattering_filter_factory, scatnet_generator, get_max_dyadic_subsampling
 
 def compute_border_indices(log2_T, J, i0, i1):
     """
@@ -109,8 +109,18 @@ def precompute_size_scattering(J, Q, T, max_order, r_psi, sigma0, alpha):
     """
     sigma_min = sigma0 / math.pow(2, J)
     Q1, Q2 = Q
-    xi1s, sigma1s, j1s = compute_params_filterbank(sigma_min, Q1, alpha, r_psi)
-    xi2s, sigma2s, j2s = compute_params_filterbank(sigma_min, Q2, alpha, r_psi)
+
+    xi1s = [xi1 for xi1, _ in scatnet_generator(J, Q1, r_psi, sigma0)]
+    sigma1s = [sigma1 for _, sigma1 in scatnet_generator(J, Q1, r_psi, sigma0)]
+    j1s = [
+        get_max_dyadic_subsampling(xi1, sigma1, alpha)
+        for xi1, sigma1 in scatnet_generator(J, Q1, r_psi, sigma0)]
+
+    xi2s = [xi2 for xi2, _ in scatnet_generator(J, Q2, r_psi, sigma0)]
+    sigma2s = [sigma2 for _, sigma2 in scatnet_generator(J, Q2, r_psi, sigma0)]
+    j2s = [
+        get_max_dyadic_subsampling(xi2, sigma2, alpha)
+        for xi2, sigma2 in scatnet_generator(J, Q2, r_psi, sigma0)]
 
     sizes = [1, len(xi1s)]
     size_order2 = 0
@@ -181,8 +191,18 @@ def compute_meta_scattering(J, Q, T, max_order, r_psi, sigma0, alpha):
     """
     sigma_min = sigma0 / math.pow(2, J)
     Q1, Q2 = Q
-    xi1s, sigma1s, j1s = compute_params_filterbank(sigma_min, Q1, alpha, r_psi)
-    xi2s, sigma2s, j2s = compute_params_filterbank(sigma_min, Q2, alpha, r_psi)
+
+    xi1s = [xi1 for xi1, _ in scatnet_generator(J, Q1, r_psi, sigma0)]
+    sigma1s = [sigma1 for _, sigma1 in scatnet_generator(J, Q1, r_psi, sigma0)]
+    j1s = [
+        get_max_dyadic_subsampling(xi1, sigma1, alpha)
+        for xi1, sigma1 in scatnet_generator(J, Q1, r_psi, sigma0)]
+
+    xi2s = [xi2 for xi2, _ in scatnet_generator(J, Q2, r_psi, sigma0)]
+    sigma2s = [sigma2 for _, sigma2 in scatnet_generator(J, Q2, r_psi, sigma0)]
+    j2s = [
+        get_max_dyadic_subsampling(xi2, sigma2, alpha)
+        for xi2, sigma2 in scatnet_generator(J, Q2, r_psi, sigma0)]
 
     meta = {}
 
