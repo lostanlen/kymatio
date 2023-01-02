@@ -377,10 +377,11 @@ def scattering_filter_factory(N, J, Q, T, filterbank, normalize="l2"):
 
             # Construct filter at full resolution
             psi_level0 = morlet_1d(N, xi, sigma)
-            if normalize=="linf":
-                psi_level0 *= sigma
-            psi_levels = [psi_level0]
             j = get_max_dyadic_subsampling(xi, sigma, **filterbank_kwargs)
+            if normalize=="linf":
+                psi_level0 /= sigma * (1 + (j==0))
+            psi_levels = [psi_level0]
+
 
             # Resample to smaller resolutions if necessary (beyond 1st layer)
             # The idiom min(previous_J, j, log2_T) implements "j1 < j2"
