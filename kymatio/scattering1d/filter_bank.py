@@ -319,7 +319,7 @@ def spin(filterbank_fn, filterbank_kwargs):
     return spinned_fn, filterbank_kwargs
 
 
-def scattering_filter_factory(N, J, Q, T, filterbank):
+def scattering_filter_factory(N, J, Q, T, filterbank, normalize="l2"):
     """
     Builds in Fourier the Morlet filters used for the scattering transform.
 
@@ -351,6 +351,9 @@ def scattering_filter_factory(N, J, Q, T, filterbank):
         **filterbank_kwargs as optional keyword arguments.
         Corresponds to the self.filterbank property of the scattering object.
         As of v0.3, only anden_generator is supported as filterbank_fn.
+    normalize : string.
+        If "l2" (default), all filters have the same l2 norm in the time domain.
+        If "linf", all filters have the same maximal value in the time domain.
 
     Returns
     -------
@@ -373,7 +376,10 @@ def scattering_filter_factory(N, J, Q, T, filterbank):
         for xi, sigma in filterbank_fn(J, Q_layer, **filterbank_kwargs):
 
             # Construct filter at full resolution
-            psi_levels = [morlet_1d(N, xi, sigma)]
+            psi_level0 = morlet_1d(N, xi, sigma)
+            if normalize=="linf":
+                psi_level0 *= sigma
+            psi_levels = [psi_level0]
             j = get_max_dyadic_subsampling(xi, sigma, **filterbank_kwargs)
 
             # Resample to smaller resolutions if necessary (beyond 1st layer)
