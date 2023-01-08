@@ -319,7 +319,7 @@ def spin(filterbank_fn, filterbank_kwargs):
     return spinned_fn, filterbank_kwargs
 
 
-def scattering_filter_factory(N, J, Q, T, filterbank, normalize="l2"):
+def scattering_filter_factory(N, J, Q, T, filterbank):
     """
     Builds in Fourier the Morlet filters used for the scattering transform.
 
@@ -378,8 +378,6 @@ def scattering_filter_factory(N, J, Q, T, filterbank, normalize="l2"):
             # Construct filter at full resolution
             psi_level0 = morlet_1d(N, xi, sigma)
             j = get_max_dyadic_subsampling(xi, sigma, **filterbank_kwargs)
-            if normalize=="linf":
-                psi_level0 /= sigma * (1 + (j==0))
             psi_levels = [psi_level0]
 
 
@@ -399,7 +397,7 @@ def scattering_filter_factory(N, J, Q, T, filterbank, normalize="l2"):
     sigma_low = filterbank_kwargs["sigma0"] / T
     phi_levels = [gauss_1d(N, sigma_low)]
     for level in range(1, max(previous_J, 1+log2_T)):
-        phi_level = phi_levels[0].reshape(2 ** level, -1).mean(axis=0)
+        phi_level = phi_levels[0].reshape(2 ** level, -1).mean(axis=0)  * (2**level)
         phi_levels.append(phi_level)
     phi_f = {'levels': phi_levels, 'xi': 0, 'sigma': sigma_low, 'j': log2_T,
         'N': N}
