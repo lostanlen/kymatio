@@ -113,7 +113,7 @@ class ScatteringBase1D(ScatteringBase):
 
         U_0 = self.backend.pad(x, pad_left=self.pad_left, pad_right=self.pad_right)
 
-        filters = [self.phi_f, self.psi1_f, self.psi2_f][:(1+self.max_order)]
+        filters = self.filters[:(1+self.max_order)]
         S_gen = scattering1d(U_0, self.backend, filters,
             self.log2_stride, (self.average=='local'))
 
@@ -185,7 +185,7 @@ class ScatteringBase1D(ScatteringBase):
                 in the non-vectorized output.
         """
         backend = self._DryBackend()
-        filters = [self.phi_f, self.psi1_f, self.psi2_f][:(1+self.max_order)]
+        filters = self.filters[:(1+self.max_order)]
         S_gen = scattering1d(
             None, backend, filters, self.log2_stride, average_local=False)
         S = sorted(list(S_gen), key=lambda path: (len(path['n']), path['n']))
@@ -246,6 +246,10 @@ class ScatteringBase1D(ScatteringBase):
     @property
     def average(self):
         return parse_T(self._T, self.J, self.shape[0], T_alias='T')[1]
+    
+    @property
+    def filters(self):
+        return [self.phi_f, self.psi1_f, self.psi2_f]
 
     @property
     def filterbank(self):
