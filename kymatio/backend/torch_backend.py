@@ -29,7 +29,7 @@ class ModulusStable(Function):
         zero).
     """
     @staticmethod
-    def forward(ctx, x):
+    def forward(x):
         """Forward pass of the modulus.
 
         This is a static method which does not require an instantiation of the
@@ -37,10 +37,6 @@ class ModulusStable(Function):
 
         Arguments
         ---------
-        ctx : context object
-            Collected during the forward pass. These are automatically added
-            by PyTorch and should not be touched. They are then used for the
-            backward pass.
         x : tensor
             The complex tensor whose modulus is to be computed.
 
@@ -50,15 +46,16 @@ class ModulusStable(Function):
             This contains the modulus computed along the last axis, with that
             axis removed.
         """
+        output = (x[...,0] * x[...,0] + x[...,1] * x[...,1]).sqrt()
+        return output
+    
+    @staticmethod
+    def setup_context(ctx, inputs, output):
+        x, = inputs
         ctx.p = 2
         ctx.dim = -1
         ctx.keepdim = False
-
-        output = (x[...,0] * x[...,0] + x[...,1] * x[...,1]).sqrt()
-
         ctx.save_for_backward(x, output)
-
-        return output
 
     @staticmethod
     def backward(ctx, grad_output):
@@ -94,6 +91,32 @@ class ModulusStable(Function):
         grad_input.masked_fill_(output == 0, 0)
 
         return grad_input
+    
+    @staticmethod
+    def jvp(ctx, grad_input):
+        """Jacobian-vector product of the modulus.
+        This is useful for forward-mode automatic differentiation.
+        
+        Arguments
+        ---------
+        ctx : context object
+        grad_input : tensor
+            The vector with respect to which the Jacobian-vector product is
+            computed.
+        
+        Returns
+        -------
+        output : tensor
+            The Jacobian-vector product.
+        """
+        x, output = ctx.saved_tensors
+        grad_output = (
+            x[...,0]*grad_input[...,0] +
+            x[...,1]*grad_input[...,1]) / output
+        
+        # Special case at 0 where we return a subgradient containing 0
+        grad_output.masked_fill_(output == 0, 0)
+        return grad_output
 
 
 class TorchBackend:
