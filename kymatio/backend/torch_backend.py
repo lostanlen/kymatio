@@ -28,6 +28,8 @@ class ModulusStable(Function):
         to the input in a stable fashion (so gradent of the modulus at zero is
         zero).
     """
+    generate_vmap_rule = True
+
     @staticmethod
     def forward(x):
         """Forward pass of the modulus.
